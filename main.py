@@ -11,10 +11,29 @@ def sensor_temperature():
         basic.pause(5000)
         control.reset()
 def startup():
+    music.play(music.create_sound_expression(WaveShape.SINE,
+            1,
+            5000,
+            0,
+            255,
+            1000,
+            SoundExpressionEffect.NONE,
+            InterpolationCurve.LINEAR),
+        music.PlaybackMode.UNTIL_DONE)
+    basic.pause(500)
+    music.play(music.create_sound_expression(WaveShape.SINE,
+            5000,
+            5000,
+            255,
+            255,
+            100,
+            SoundExpressionEffect.NONE,
+            InterpolationCurve.LINEAR),
+        music.PlaybackMode.UNTIL_DONE)
     OLED.init(128, 64)
     OLED.write_string_new_line("Personal smart home project system. OS version v12.5.7")
     OLED.write_string_new_line("Device name: " + control.device_name())
-    OLED.write_string_new_line("Device serial number: " + ("" + str(control.device_serial_number())))
+    OLED.write_string_new_line("Device serial number: " + str(control.device_serial_number()))
     OLED.clear()
     OLED.draw_loading(0)
     keypad.set_key_pad4(DigitalPin.P9,
@@ -131,6 +150,8 @@ def on_forever2():
     if dht11_dht22.read_data_successful() and (esp8266.is_esp8266_initialized() and esp8266.is_wifi_connected() and dht11_dht22.read_data_successful()):
         list2[0] = dht11_dht22.read_data(dataType.HUMIDITY)
         list2[1] = dht11_dht22.read_data(dataType.TEMPERATURE)
+        radio.send_value("RTC-82734568", list2[0])
+        radio.send_value("RTC-53456725", list2[1])
         esp8266.upload_thingspeak("2WWRE6MHVGBS1Q7S", list2[0], list2[1])
         if esp8266.is_thingspeak_uploaded():
             basic.show_icon(IconNames.YES)
