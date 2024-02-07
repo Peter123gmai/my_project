@@ -31,7 +31,7 @@ def startup():
             InterpolationCurve.LINEAR),
         music.PlaybackMode.UNTIL_DONE)
     OLED.init(128, 64)
-    OLED.write_string_new_line("Personal smart home project system. OS version v12.5.7")
+    OLED.write_string_new_line("Personal smart home project system. OS version v5.6.4")
     OLED.write_string_new_line("Device name: " + control.device_name())
     OLED.write_string_new_line("Device serial number: " + str(control.device_serial_number()))
     OLED.clear()

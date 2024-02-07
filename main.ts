@@ -23,9 +23,9 @@ function startup () {
     basic.pause(500)
     music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
     OLED.init(128, 64)
-    OLED.writeStringNewLine("Personal smart home project system. OS version v12.5.7")
+    OLED.writeStringNewLine("Personal smart home project system. OS version v5.6.4")
     OLED.writeStringNewLine("Device name: " + control.deviceName())
-    OLED.writeStringNewLine("Device serial number: " + control.deviceSerialNumber())
+    OLED.writeStringNewLine("Device serial number: " + ("" + control.deviceSerialNumber()))
     OLED.clear()
     OLED.drawLoading(0)
     keypad.setKeyPad4(
@@ -135,7 +135,7 @@ function Wifi_setup () {
     }
 }
 let gate_door_is_close = false
-let list = [0, 1]
+let list2 = [0, 1]
 startup()
 basic.forever(function () {
     if (gate_door_is_close == true) {
@@ -153,14 +153,14 @@ basic.forever(function () {
 })
 basic.forever(function () {
     if (dht11_dht22.readDataSuccessful() && (esp8266.isESP8266Initialized() && esp8266.isWifiConnected() && dht11_dht22.readDataSuccessful())) {
-        list[0] = dht11_dht22.readData(dataType.humidity)
-        list[1] = dht11_dht22.readData(dataType.temperature)
-        radio.sendValue("RTC-82734568", list[0])
-        radio.sendValue("RTC-53456725", list[1])
+        list2[0] = dht11_dht22.readData(dataType.humidity)
+        list2[1] = dht11_dht22.readData(dataType.temperature)
+        radio.sendValue("RTC-82734568", list2[0])
+        radio.sendValue("RTC-53456725", list2[1])
         esp8266.uploadThingspeak(
         "2WWRE6MHVGBS1Q7S",
-        list[0],
-        list[1]
+        list2[0],
+        list2[1]
         )
         if (esp8266.isThingspeakUploaded()) {
             basic.showIcon(IconNames.Yes)
