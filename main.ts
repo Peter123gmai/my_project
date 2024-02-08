@@ -3,6 +3,7 @@ function sensor_temperature () {
         OLED.drawLoading(30)
         Wifi_setup()
     } else if (!(dht11_dht22.sensorrResponding()) || !(dht11_dht22.readDataSuccessful())) {
+        OLED.clear()
         OLED.writeStringNewLine("Sensor temperature is not found. please check and reboot into system ")
         OLED.clear()
         OLED.writeStringNewLine("Rebooting...")
@@ -23,7 +24,7 @@ function startup () {
     basic.pause(500)
     music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
     OLED.init(128, 64)
-    OLED.writeStringNewLine("Personal smart home project system. OS version v5.6.4")
+    OLED.writeStringNewLine("Smart Home Iot project. OS version v5.6.5")
     OLED.writeStringNewLine("Device name: " + control.deviceName())
     OLED.writeStringNewLine("Device serial number: " + ("" + control.deviceSerialNumber()))
     OLED.clear()
@@ -117,6 +118,7 @@ function Wifi_setup () {
             basic.clearScreen()
             startup2()
         } else {
+            OLED.clear()
             OLED.writeStringNewLine("cannot connect to router wifi. Please check and reboot into system")
             esp8266.connectWiFi("VAN HOAN", "Winthovanhoan")
             OLED.clear()
@@ -126,6 +128,7 @@ function Wifi_setup () {
             control.reset()
         }
     } else {
+        OLED.clear()
         OLED.writeStringNewLine("cannot initialize module wifi ESP8266 - Cytron. Please check and reboot into system")
         OLED.clear()
         OLED.writeStringNewLine("Rebooting...")
