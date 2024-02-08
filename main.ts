@@ -126,7 +126,7 @@ function Wifi_setup () {
             control.reset()
         }
     } else {
-        OLED.writeStringNewLine("cannot initialize module wifi esp8266. Please check and reboot into system")
+        OLED.writeStringNewLine("cannot initialize module wifi ESP8266 - Cytron. Please check and reboot into system")
         OLED.clear()
         OLED.writeStringNewLine("Rebooting...")
         OLED.clear()
@@ -135,6 +135,15 @@ function Wifi_setup () {
     }
 }
 let gate_door_is_close = false
+DS1307.DateTime(
+2024,
+2,
+8,
+4,
+15,
+30,
+30
+)
 let list2 = [0, 1]
 startup()
 basic.forever(function () {

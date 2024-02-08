@@ -123,7 +123,7 @@ def Wifi_setup():
             basic.pause(5000)
             control.reset()
     else:
-        OLED.write_string_new_line("cannot initialize module wifi esp8266. Please check and reboot into system")
+        OLED.write_string_new_line("cannot initialize module wifi ESP8266 - Cytron. Please check and reboot into system")
         OLED.clear()
         OLED.write_string_new_line("Rebooting...")
         OLED.clear()
