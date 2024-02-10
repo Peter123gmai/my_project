@@ -3,6 +3,7 @@ def sensor_temperature():
         OLED.draw_loading(30)
         Wifi_setup()
     elif not (dht11_dht22.sensorr_responding()) or not (dht11_dht22.read_data_successful()):
+        OLED.clear()
         OLED.write_string_new_line("Sensor temperature is not found. please check and reboot into system ")
         OLED.clear()
         OLED.write_string_new_line("Rebooting...")
@@ -31,9 +32,9 @@ def startup():
             InterpolationCurve.LINEAR),
         music.PlaybackMode.UNTIL_DONE)
     OLED.init(128, 64)
-    OLED.write_string_new_line("Personal smart home project system. OS version v5.6.4")
-    OLED.write_string_new_line("Device name: " + control.device_name())
-    OLED.write_string_new_line("Device serial number: " + str(control.device_serial_number()))
+    OLED.write_string_new_line("Smarthome Iot version 5.6.8")
+    OLED.write_string_new_line("Device name: " + text_list[2])
+    OLED.write_string_new_line("Device serial number: " + text_list[3])
     OLED.clear()
     OLED.draw_loading(0)
     keypad.set_key_pad4(DigitalPin.P9,
@@ -115,6 +116,7 @@ def Wifi_setup():
             basic.clear_screen()
             startup2()
         else:
+            OLED.clear()
             OLED.write_string_new_line("cannot connect to router wifi. Please check and reboot into system")
             esp8266.connect_wi_fi("VAN HOAN", "Winthovanhoan")
             OLED.clear()
@@ -123,6 +125,7 @@ def Wifi_setup():
             basic.pause(5000)
             control.reset()
     else:
+        OLED.clear()
         OLED.write_string_new_line("cannot initialize module wifi ESP8266 - Cytron. Please check and reboot into system")
         OLED.clear()
         OLED.write_string_new_line("Rebooting...")
@@ -130,7 +133,12 @@ def Wifi_setup():
         basic.pause(5000)
         control.reset()
 gate_door_is_close = False
+text_list: List[str] = []
+DS1307.date_time(2024, 2, 8, 4, 15, 30, 30)
 list2 = [0, 1]
+device_serial_number = control.device_serial_number()
+device_name = control.device_name()
+text_list = [device_name, device_serial_number]
 startup()
 
 def on_forever():

@@ -24,9 +24,9 @@ function startup () {
     basic.pause(500)
     music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
     OLED.init(128, 64)
-    OLED.writeStringNewLine("Smart Home Iot project. OS version v5.6.5")
+    OLED.writeStringNewLine("Smarthome Iot version 5.6.8")
     OLED.writeStringNewLine("Device name: " + control.deviceName())
-    OLED.writeStringNewLine("Device serial number: " + ("" + control.deviceSerialNumber()))
+    OLED.writeStringNewLine("Device serial number: " + control.deviceSerialNumber())
     OLED.clear()
     OLED.drawLoading(0)
     keypad.setKeyPad4(
