@@ -1,5 +1,5 @@
 {
-    "name": "smart home",
+    "name": "smart home updated",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -8,8 +8,7 @@
         "microphone": "*",
         "pxt-DHT11_DHT22": "github:alankrantas/pxt-dht11_dht22#v0.0.3",
         "SSD1306_OLED": "github:tinkertanker/pxt-oled-ssd1306#v2.0.13",
-        "pxt-esp8266": "github:cytrontechnologies/pxt-esp8266#v2.0.1",
-        "DS1307": "github:makecode-extensions/ds1307#v1.2.0"
+        "pxt-esp8266": "github:cytrontechnologies/pxt-esp8266#v2.0.1"
     },
     "files": [
         "main.blocks",

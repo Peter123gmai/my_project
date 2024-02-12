@@ -1,73 +1,38 @@
-def sensor_temperature():
-    if dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding():
-        OLED.draw_loading(30)
-        Wifi_setup()
-    elif not (dht11_dht22.sensorr_responding()) or not (dht11_dht22.read_data_successful()):
-        OLED.clear()
-        OLED.write_string_new_line("Sensor temperature is not found. please check and reboot into system ")
-        OLED.clear()
-        OLED.write_string_new_line("Rebooting...")
-        OLED.clear()
-        dht11_dht22.query_data(DHTtype.DHT22, DigitalPin.P9, True, True, False)
-        basic.pause(5000)
+def Wifi():
+    esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BAUD_RATE115200)
+    if esp8266.is_esp8266_initialized():
+        esp8266.connect_wi_fi("HOAN VAN", "winthovanhoan")
+        if esp8266.is_wifi_connected():
+            Sensor_DHT22()
+        else:
+            OLED.write_string_new_line("Cannot connect to router. Please check and reboot sysstem")
+            esp8266.connect_wi_fi("HOAN VAN", "winthovanhoan")
+            basic.pause(500)
+            control.reset()
+    else:
+        OLED.write_string_new_line("ESP8266 is not found. Please check and reboot sysstem")
+        esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BAUD_RATE115200)
+        basic.pause(500)
         control.reset()
-def startup():
-    music.play(music.create_sound_expression(WaveShape.SINE,
-            1,
-            5000,
-            0,
-            255,
-            1000,
-            SoundExpressionEffect.NONE,
-            InterpolationCurve.LINEAR),
-        music.PlaybackMode.UNTIL_DONE)
-    basic.pause(500)
-    music.play(music.create_sound_expression(WaveShape.SINE,
-            5000,
-            5000,
-            255,
-            255,
-            100,
-            SoundExpressionEffect.NONE,
-            InterpolationCurve.LINEAR),
-        music.PlaybackMode.UNTIL_DONE)
-    OLED.init(128, 64)
-    OLED.write_string_new_line("Smarthome Iot version 5.6.8")
-    OLED.write_string_new_line("Device name: " + text_list[2])
-    OLED.write_string_new_line("Device serial number: " + text_list[3])
-    OLED.clear()
-    OLED.draw_loading(0)
-    keypad.set_key_pad4(DigitalPin.P9,
-        DigitalPin.P10,
-        DigitalPin.P11,
-        DigitalPin.P12,
-        DigitalPin.P13,
-        DigitalPin.P14,
-        DigitalPin.P15,
-        DigitalPin.P16)
-    dht11_dht22.query_data(DHTtype.DHT22, DigitalPin.P8, True, True, False)
-    dht11_dht22.select_temp_type(tempType.CELSIUS)
-    OLED.draw_loading(5)
-    sensor_temperature()
-def startup2():
+def Startup():
     basic.show_leds("""
         # . # . #
         . . . . .
-        # . # . #
+        # . . . #
         . . . . .
         # . # . #
         """)
     basic.show_leds("""
         . . . . .
         . # # # .
-        . # # # .
+        . # . # .
         . # # # .
         . . . . .
         """)
     basic.show_leds("""
         . . . . #
         . # # # .
-        . # # # .
+        . # . # .
         . # # # .
         # . . . .
         """)
@@ -93,77 +58,74 @@ def startup2():
         # . # . #
         """)
     basic.clear_screen()
-    OLED.clear()
-    OLED.write_string_new_line("Type Password:")
     music.play(music.string_playable("C E G B C5 A F D ", 300),
         music.PlaybackMode.UNTIL_DONE)
-def Wifi_setup():
-    esp8266.init(SerialPin.USB_TX, SerialPin.USB_RX, BaudRate.BAUD_RATE115200)
-    if esp8266.is_esp8266_initialized():
-        OLED.draw_loading(50)
-        esp8266.connect_wi_fi("VAN HOAN", "Winthovanhoan")
-        if esp8266.is_wifi_connected():
-            OLED.draw_loading(100)
-            OLED.clear()
-            for index in range(4):
-                OLED.write_string_new_line("starting up.")
-                basic.pause(100)
-                OLED.write_string_new_line("starting up..")
-                basic.pause(100)
-                OLED.write_string_new_line("starting up...")
-                basic.pause(100)
-            OLED.clear()
-            basic.clear_screen()
-            startup2()
-        else:
-            OLED.clear()
-            OLED.write_string_new_line("cannot connect to router wifi. Please check and reboot into system")
-            esp8266.connect_wi_fi("VAN HOAN", "Winthovanhoan")
-            OLED.clear()
-            OLED.write_string_new_line("Rebooting...")
-            OLED.clear()
-            basic.pause(5000)
-            control.reset()
-    else:
-        OLED.clear()
-        OLED.write_string_new_line("cannot initialize module wifi ESP8266 - Cytron. Please check and reboot into system")
-        OLED.clear()
-        OLED.write_string_new_line("Rebooting...")
-        OLED.clear()
-        basic.pause(5000)
+def Sensor_DHT22():
+    dht11_dht22.query_data(DHTtype.DHT22, DigitalPin.P2, True, True, False)
+    dht11_dht22.select_temp_type(tempType.CELSIUS)
+    if dht11_dht22.sensorr_responding() and dht11_dht22.read_data_successful():
+        dht11_dht22.select_temp_type(tempType.CELSIUS)
+        Startup()
+    elif not (dht11_dht22.sensorr_responding()) or not (dht11_dht22.read_data_successful()):
+        OLED.write_string_new_line("Sensor DHT22 is not found. Please check and reboot system")
+        dht11_dht22.query_data(DHTtype.DHT22, DigitalPin.P2, True, True, False)
+        dht11_dht22.select_temp_type(tempType.CELSIUS)
+        basic.pause(500)
         control.reset()
-gate_door_is_close = False
-text_list: List[str] = []
-DS1307.date_time(2024, 2, 8, 4, 15, 30, 30)
+date = ""
+time = ""
+hour = 0
+minute_text = ""
+OLED.init(128, 64)
 list2 = [0, 1]
-device_serial_number = control.device_serial_number()
-device_name = control.device_name()
-text_list = [device_name, device_serial_number]
-startup()
+music.play(music.create_sound_expression(WaveShape.SINE,
+        1,
+        5000,
+        0,
+        255,
+        1000,
+        SoundExpressionEffect.NONE,
+        InterpolationCurve.LINEAR),
+    music.PlaybackMode.UNTIL_DONE)
+basic.pause(500)
+music.play(music.create_sound_expression(WaveShape.SINE,
+        5000,
+        5000,
+        255,
+        255,
+        100,
+        SoundExpressionEffect.NONE,
+        InterpolationCurve.LINEAR),
+    music.PlaybackMode.UNTIL_DONE)
+Wifi()
 
 def on_forever():
-    global gate_door_is_close
-    if gate_door_is_close == True:
-        OLED.write_string_new_line(keypad.get_key_string())
-        if keypad.get_key_string() == "A03745BCD83":
-            gate_door_is_close = False
-            OLED.write_string_new_line("Type # to close")
-    elif gate_door_is_close == False:
-        if keypad.get_key_string() == "#":
-            gate_door_is_close = True
-            OLED.write_string_new_line("Type password: ")
-basic.forever(on_forever)
-
-def on_forever2():
-    if dht11_dht22.read_data_successful() and (esp8266.is_esp8266_initialized() and esp8266.is_wifi_connected() and dht11_dht22.read_data_successful()):
+    if esp8266.is_wifi_connected() and (esp8266.is_esp8266_initialized() and (dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding())):
         list2[0] = dht11_dht22.read_data(dataType.HUMIDITY)
         list2[1] = dht11_dht22.read_data(dataType.TEMPERATURE)
-        radio.send_value("RTC-82734568", list2[0])
-        radio.send_value("RTC-53456725", list2[1])
         esp8266.upload_thingspeak("2WWRE6MHVGBS1Q7S", list2[0], list2[1])
         if esp8266.is_thingspeak_uploaded():
             basic.show_icon(IconNames.YES)
             basic.clear_screen()
         else:
-            basic.show_number(593)
+            basic.show_icon(IconNames.SAD)
+            basic.clear_screen()
+basic.forever(on_forever)
+
+def on_forever2():
+    global minute_text, hour, time, date
+    esp8266.update_internet_time()
+    if esp8266.is_internet_time_updated():
+        if (0) < (10):
+            minute_text = "0" + ("" + str(esp8266.get_minute()))
+        else:
+            minute_text = convert_to_text(esp8266.get_minute())
+        if esp8266.get_hour() > 12:
+            hour = esp8266.get_hour() - 12
+        else:
+            hour = esp8266.get_hour()
+        time = "" + str(esp8266.get_hour()) + " / " + ("" + str(esp8266.get_minute())) + " / " + ("" + str(esp8266.get_second()))
+        date = "" + str(esp8266.get_day()) + " / " + ("" + str(esp8266.get_month())) + " / " + ("" + str(esp8266.get_year()))
+    else:
+        esp8266.update_internet_time()
 basic.forever(on_forever2)
