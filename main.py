@@ -1,3 +1,7 @@
+def on_log_full():
+    datalogger.delete_log(datalogger.DeleteType.FULL)
+datalogger.on_log_full(on_log_full)
+
 def Wifi():
     esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BAUD_RATE115200)
     if esp8266.is_esp8266_initialized():
@@ -5,14 +9,46 @@ def Wifi():
         if esp8266.is_wifi_connected():
             Sensor_DHT22()
         else:
-            OLED.write_string_new_line("Cannot connect to router. Please check and reboot sysstem")
+            OLED12864_I2C.clear()
+            OLED12864_I2C.show_string(0,
+                0,
+                "Cannot connect to router. Please check and reboot sysstem",
+                1)
+            OLED12864_I2C.clear()
+            basic.pause(2000)
             esp8266.connect_wi_fi("HOAN VAN", "winthovanhoan")
             basic.pause(500)
+            esp8266.send_telegram_message("",
+                "",
+                "Cannot connect to router. Please check and reboot sysstem")
+            if esp8266.is_telegram_message_sent():
+                basic.show_icon(IconNames.YES)
+                basic.clear_screen()
+            else:
+                basic.show_icon(IconNames.NO)
+                basic.clear_screen()
+            datalogger.log(datalogger.create_cv("Error wifi", 2))
             control.reset()
     else:
-        OLED.write_string_new_line("ESP8266 is not found. Please check and reboot sysstem")
+        OLED12864_I2C.clear()
+        OLED12864_I2C.show_string(0,
+            0,
+            "ESP8266 is not found. Please check and reboot sysstem",
+            1)
+        OLED12864_I2C.clear()
+        basic.pause(2000)
         esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BAUD_RATE115200)
         basic.pause(500)
+        esp8266.send_telegram_message("",
+            "",
+            "ESP8266 is not found. Please check and reboot sysstem")
+        if esp8266.is_telegram_message_sent():
+            basic.show_icon(IconNames.YES)
+            basic.clear_screen()
+        else:
+            basic.show_icon(IconNames.NO)
+            basic.clear_screen()
+        datalogger.log(datalogger.create_cv("Error wifi1", 2))
         control.reset()
 def Startup():
     basic.show_leds("""
@@ -65,19 +101,44 @@ def Sensor_DHT22():
     dht11_dht22.select_temp_type(tempType.CELSIUS)
     if dht11_dht22.sensorr_responding() and dht11_dht22.read_data_successful():
         dht11_dht22.select_temp_type(tempType.CELSIUS)
+        OLED12864_I2C.rect(1, 1, 60, 30, 3)
+        for index in range(randint(1, 5)):
+            OLED12864_I2C.show_string(70, 70, "Starting up.", 1)
+            OLED12864_I2C.show_string(70, 70, "Starting up..", 1)
+            OLED12864_I2C.show_string(70, 70, "Starting up...", 1)
         Startup()
     elif not (dht11_dht22.sensorr_responding()) or not (dht11_dht22.read_data_successful()):
-        OLED.write_string_new_line("Sensor DHT22 is not found. Please check and reboot system")
+        OLED12864_I2C.clear()
+        OLED12864_I2C.show_string(0, 0, "Hello!", 1)
+        OLED12864_I2C.clear()
+        basic.pause(2000)
         dht11_dht22.query_data(DHTtype.DHT22, DigitalPin.P2, True, True, False)
         dht11_dht22.select_temp_type(tempType.CELSIUS)
-        basic.pause(500)
+        esp8266.send_telegram_message("",
+            "",
+            "Sensor DHT22 is not found. Please check and reboot system")
+        if esp8266.is_telegram_message_sent():
+            basic.show_icon(IconNames.YES)
+            basic.clear_screen()
+        else:
+            basic.show_icon(IconNames.NO)
+            basic.clear_screen()
+        datalogger.log(datalogger.create_cv("Error sensor", 1))
         control.reset()
 date = ""
 time = ""
 hour = 0
 minute_text = ""
-OLED.init(128, 64)
-list2 = [0, 1]
+OLED12864_I2C.init(60)
+list2 = [1, 1]
+keypad.set_key_pad4(DigitalPin.P9,
+    DigitalPin.P10,
+    DigitalPin.P11,
+    DigitalPin.P12,
+    DigitalPin.P13,
+    DigitalPin.P14,
+    DigitalPin.P15,
+    DigitalPin.P16)
 music.play(music.create_sound_expression(WaveShape.SINE,
         1,
         5000,
@@ -100,6 +161,12 @@ music.play(music.create_sound_expression(WaveShape.SINE,
 Wifi()
 
 def on_forever():
+    if dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding():
+        OLED12864_I2C.show_string(3, 3, "Temperate outside", 1)
+        OLED12864_I2C.show_number(3, 4, dht11_dht22.read_data(dataType.TEMPERATURE), 1)
+basic.forever(on_forever)
+
+def on_forever2():
     if esp8266.is_wifi_connected() and (esp8266.is_esp8266_initialized() and (dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding())):
         list2[0] = dht11_dht22.read_data(dataType.HUMIDITY)
         list2[1] = dht11_dht22.read_data(dataType.TEMPERATURE)
@@ -108,24 +175,25 @@ def on_forever():
             basic.show_icon(IconNames.YES)
             basic.clear_screen()
         else:
-            basic.show_icon(IconNames.SAD)
+            basic.show_icon(IconNames.NO)
             basic.clear_screen()
-basic.forever(on_forever)
-
-def on_forever2():
-    global minute_text, hour, time, date
-    esp8266.update_internet_time()
-    if esp8266.is_internet_time_updated():
-        if (0) < (10):
-            minute_text = "0" + ("" + str(esp8266.get_minute()))
-        else:
-            minute_text = convert_to_text(esp8266.get_minute())
-        if esp8266.get_hour() > 12:
-            hour = esp8266.get_hour() - 12
-        else:
-            hour = esp8266.get_hour()
-        time = "" + str(esp8266.get_hour()) + " / " + ("" + str(esp8266.get_minute())) + " / " + ("" + str(esp8266.get_second()))
-        date = "" + str(esp8266.get_day()) + " / " + ("" + str(esp8266.get_month())) + " / " + ("" + str(esp8266.get_year()))
-    else:
-        esp8266.update_internet_time()
 basic.forever(on_forever2)
+
+def on_forever3():
+    global minute_text, hour, time, date
+    if esp8266.is_wifi_connected() and esp8266.is_esp8266_initialized():
+        esp8266.update_internet_time()
+        if esp8266.is_internet_time_updated():
+            if (0) < (10):
+                minute_text = "0" + str(esp8266.get_minute())
+            else:
+                minute_text = convert_to_text(esp8266.get_minute())
+            if esp8266.get_hour() > 12:
+                hour = esp8266.get_hour() - 12
+            else:
+                hour = esp8266.get_hour()
+            time = "" + str(esp8266.get_hour()) + " / " + str(esp8266.get_minute()) + " / " + str(esp8266.get_second())
+            date = "" + str(esp8266.get_day()) + " / " + str(esp8266.get_month()) + " / " + str(esp8266.get_year())
+        else:
+            esp8266.update_internet_time()
+basic.forever(on_forever3)

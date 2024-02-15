@@ -1,5 +1,5 @@
 {
-    "name": "smart home",
+    "name": "smart home #2",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -7,8 +7,9 @@
         "keypad": "github:lioujj/pxt-keypad#febb778e65a5035beadfde2424f02a110d1460c4",
         "microphone": "*",
         "pxt-DHT11_DHT22": "github:alankrantas/pxt-dht11_dht22#v0.0.3",
-        "SSD1306_OLED": "github:tinkertanker/pxt-oled-ssd1306#v2.0.13",
-        "pxt-esp8266": "github:cytrontechnologies/pxt-esp8266#v2.0.1"
+        "pxt-esp8266": "github:cytrontechnologies/pxt-esp8266#v2.0.1",
+        "datalogger": "*",
+        "OLED12864_I2C": "github:makecode-extensions/oled12864_i2c#v1.5.0"
     },
     "files": [
         "main.blocks",
