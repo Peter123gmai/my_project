@@ -180,6 +180,7 @@ let date = ""
 let time = ""
 let hour = 0
 let minute_text = ""
+NFC.NFC_setSerial(SerialPin.P15, SerialPin.P16)
 OLED12864_I2C.init(60)
 let list2 = [1, 1]
 keypad.setKeyPad4(
@@ -197,20 +198,31 @@ basic.pause(500)
 music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
 Wifi()
 basic.forever(function () {
-    if (esp8266.isWifiConnected() && (esp8266.isESP8266Initialized() && (dht11_dht22.readDataSuccessful() && dht11_dht22.sensorrResponding()))) {
-        list2[0] = dht11_dht22.readData(dataType.humidity)
-        list2[1] = dht11_dht22.readData(dataType.temperature)
-        esp8266.uploadThingspeak(
-        "2WWRE6MHVGBS1Q7S",
-        list2[0],
-        list2[1]
+    if (NFC.detectedRFIDcard()) {
+        OLED12864_I2C.showString(
+        0,
+        0,
+        "RFID card is detected!",
+        1
         )
-        if (esp8266.isThingspeakUploaded()) {
-            basic.showIcon(IconNames.Yes)
-            basic.clearScreen()
+        OLED12864_I2C.clear()
+        OLED12864_I2C.showString(
+        0,
+        0,
+        "Next, Type your password",
+        1
+        )
+        OLED12864_I2C.clear()
+        OLED12864_I2C.showString(
+        0,
+        0,
+        keypad.getKeyString(),
+        1
+        )
+        if (keypad.getKeyString() == "A312465BDC") {
+            pins.servoWritePin(AnalogPin.P14, 140)
         } else {
-            basic.showIcon(IconNames.No)
-            basic.clearScreen()
+            pins.servoWritePin(AnalogPin.P14, 90)
         }
     }
 })
@@ -248,6 +260,24 @@ basic.forever(function () {
             date = "" + esp8266.getDay() + " / " + esp8266.getMonth() + " / " + esp8266.getYear()
         } else {
             esp8266.updateInternetTime()
+        }
+    }
+})
+basic.forever(function () {
+    if (esp8266.isWifiConnected() && (esp8266.isESP8266Initialized() && (dht11_dht22.readDataSuccessful() && dht11_dht22.sensorrResponding()))) {
+        list2[0] = dht11_dht22.readData(dataType.humidity)
+        list2[1] = dht11_dht22.readData(dataType.temperature)
+        esp8266.uploadThingspeak(
+        "2WWRE6MHVGBS1Q7S",
+        list2[0],
+        list2[1]
+        )
+        if (esp8266.isThingspeakUploaded()) {
+            basic.showIcon(IconNames.Yes)
+            basic.clearScreen()
+        } else {
+            basic.showIcon(IconNames.No)
+            basic.clearScreen()
         }
     }
 })

@@ -1,3 +1,13 @@
+"""
+
+#define BLYNK_TEMPLATE_ID "TMPL6mDQdY-HU"
+
+#define BLYNK_TEMPLATE_NAME "Quickstart Template"
+
+#define BLYNK_AUTH_TOKEN "xSgmbQg-83OPJxGfZk6upXthH15t0-9t"
+
+"""
+
 def on_log_full():
     datalogger.delete_log(datalogger.DeleteType.FULL)
 datalogger.on_log_full(on_log_full)
@@ -129,6 +139,7 @@ date = ""
 time = ""
 hour = 0
 minute_text = ""
+NFC.NFC_setSerial(SerialPin.P15, SerialPin.P16)
 OLED12864_I2C.init(60)
 list2 = [1, 1]
 keypad.set_key_pad4(DigitalPin.P9,
@@ -161,22 +172,22 @@ music.play(music.create_sound_expression(WaveShape.SINE,
 Wifi()
 
 def on_forever():
-    if dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding():
-        OLED12864_I2C.show_string(3, 3, "Temperate outside", 1)
-        OLED12864_I2C.show_number(3, 4, dht11_dht22.read_data(dataType.TEMPERATURE), 1)
+    if NFC.detected_rfi_dcard():
+        OLED12864_I2C.show_string(0, 0, "RFID card is detected!", 1)
+        OLED12864_I2C.clear()
+        OLED12864_I2C.show_string(0, 0, "Next, Type your password", 1)
+        OLED12864_I2C.clear()
+        OLED12864_I2C.show_string(0, 0, keypad.get_key_string(), 1)
+        if keypad.get_key_string() == "A312465BDC":
+            pins.servo_write_pin(AnalogPin.P14, 140)
+        else:
+            pins.servo_write_pin(AnalogPin.P14, 90)
 basic.forever(on_forever)
 
 def on_forever2():
-    if esp8266.is_wifi_connected() and (esp8266.is_esp8266_initialized() and (dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding())):
-        list2[0] = dht11_dht22.read_data(dataType.HUMIDITY)
-        list2[1] = dht11_dht22.read_data(dataType.TEMPERATURE)
-        esp8266.upload_thingspeak("2WWRE6MHVGBS1Q7S", list2[0], list2[1])
-        if esp8266.is_thingspeak_uploaded():
-            basic.show_icon(IconNames.YES)
-            basic.clear_screen()
-        else:
-            basic.show_icon(IconNames.NO)
-            basic.clear_screen()
+    if dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding():
+        OLED12864_I2C.show_string(3, 3, "Temperate outside", 1)
+        OLED12864_I2C.show_number(3, 4, dht11_dht22.read_data(dataType.TEMPERATURE), 1)
 basic.forever(on_forever2)
 
 def on_forever3():
@@ -197,3 +208,16 @@ def on_forever3():
         else:
             esp8266.update_internet_time()
 basic.forever(on_forever3)
+
+def on_forever4():
+    if esp8266.is_wifi_connected() and (esp8266.is_esp8266_initialized() and (dht11_dht22.read_data_successful() and dht11_dht22.sensorr_responding())):
+        list2[0] = dht11_dht22.read_data(dataType.HUMIDITY)
+        list2[1] = dht11_dht22.read_data(dataType.TEMPERATURE)
+        esp8266.upload_thingspeak("2WWRE6MHVGBS1Q7S", list2[0], list2[1])
+        if esp8266.is_thingspeak_uploaded():
+            basic.show_icon(IconNames.YES)
+            basic.clear_screen()
+        else:
+            basic.show_icon(IconNames.NO)
+            basic.clear_screen()
+basic.forever(on_forever4)
