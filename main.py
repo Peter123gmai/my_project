@@ -1,17 +1,8 @@
-"""
-
-#define BLYNK_TEMPLATE_ID "TMPL6mDQdY-HU"
-
-#define BLYNK_TEMPLATE_NAME "Quickstart Template"
-
-#define BLYNK_AUTH_TOKEN "xSgmbQg-83OPJxGfZk6upXthH15t0-9t"
-
-"""
-
-def on_log_full():
-    datalogger.delete_log(datalogger.DeleteType.FULL)
-datalogger.on_log_full(on_log_full)
-
+# #define BLYNK_TEMPLATE_ID "TMPL6mDQdY-HU"
+# 
+# #define BLYNK_TEMPLATE_NAME "Quickstart Template"
+# 
+# #define BLYNK_AUTH_TOKEN "xSgmbQg-83OPJxGfZk6upXthH15t0-9t"
 def Wifi():
     esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BAUD_RATE115200)
     if esp8266.is_esp8266_initialized():
@@ -37,7 +28,6 @@ def Wifi():
             else:
                 basic.show_icon(IconNames.NO)
                 basic.clear_screen()
-            datalogger.log(datalogger.create_cv("Error wifi", 2))
             control.reset()
     else:
         OLED12864_I2C.clear()
@@ -58,8 +48,40 @@ def Wifi():
         else:
             basic.show_icon(IconNames.NO)
             basic.clear_screen()
-        datalogger.log(datalogger.create_cv("Error wifi1", 2))
         control.reset()
+def Starting_up():
+    global list2
+    NFC.NFC_setSerial(SerialPin.P2, SerialPin.P8)
+    OLED12864_I2C.init(60)
+    list2 = [1, 1]
+    keypad.set_key_pad4(DigitalPin.P9,
+        DigitalPin.P10,
+        DigitalPin.P11,
+        DigitalPin.P12,
+        DigitalPin.P13,
+        DigitalPin.P14,
+        DigitalPin.P15,
+        DigitalPin.P16)
+    music.play(music.create_sound_expression(WaveShape.SINE,
+            1,
+            5000,
+            0,
+            255,
+            1000,
+            SoundExpressionEffect.NONE,
+            InterpolationCurve.LINEAR),
+        music.PlaybackMode.UNTIL_DONE)
+    basic.pause(500)
+    music.play(music.create_sound_expression(WaveShape.SINE,
+            5000,
+            5000,
+            255,
+            255,
+            100,
+            SoundExpressionEffect.NONE,
+            InterpolationCurve.LINEAR),
+        music.PlaybackMode.UNTIL_DONE)
+    Wifi()
 def Startup():
     basic.show_leds("""
         # . # . #
@@ -133,43 +155,13 @@ def Sensor_DHT22():
         else:
             basic.show_icon(IconNames.NO)
             basic.clear_screen()
-        datalogger.log(datalogger.create_cv("Error sensor", 1))
         control.reset()
 date = ""
 time = ""
 hour = 0
 minute_text = ""
-NFC.NFC_setSerial(SerialPin.P15, SerialPin.P16)
-OLED12864_I2C.init(60)
-list2 = [1, 1]
-keypad.set_key_pad4(DigitalPin.P9,
-    DigitalPin.P10,
-    DigitalPin.P11,
-    DigitalPin.P12,
-    DigitalPin.P13,
-    DigitalPin.P14,
-    DigitalPin.P15,
-    DigitalPin.P16)
-music.play(music.create_sound_expression(WaveShape.SINE,
-        1,
-        5000,
-        0,
-        255,
-        1000,
-        SoundExpressionEffect.NONE,
-        InterpolationCurve.LINEAR),
-    music.PlaybackMode.UNTIL_DONE)
-basic.pause(500)
-music.play(music.create_sound_expression(WaveShape.SINE,
-        5000,
-        5000,
-        255,
-        255,
-        100,
-        SoundExpressionEffect.NONE,
-        InterpolationCurve.LINEAR),
-    music.PlaybackMode.UNTIL_DONE)
-Wifi()
+list2: List[number] = []
+Starting_up()
 
 def on_forever():
     if NFC.detected_rfi_dcard():
@@ -179,9 +171,10 @@ def on_forever():
         OLED12864_I2C.clear()
         OLED12864_I2C.show_string(0, 0, keypad.get_key_string(), 1)
         if keypad.get_key_string() == "A312465BDC":
-            pins.servo_write_pin(AnalogPin.P14, 140)
+            pins.servo_write_pin(AnalogPin.P5, 140)
+            OLED12864_I2C.clear()
         else:
-            pins.servo_write_pin(AnalogPin.P14, 90)
+            pins.servo_write_pin(AnalogPin.P5, 90)
 basic.forever(on_forever)
 
 def on_forever2():
@@ -196,15 +189,15 @@ def on_forever3():
         esp8266.update_internet_time()
         if esp8266.is_internet_time_updated():
             if (0) < (10):
-                minute_text = "0" + str(esp8266.get_minute())
+                minute_text = "0" + ("" + str(esp8266.get_minute()))
             else:
                 minute_text = convert_to_text(esp8266.get_minute())
             if esp8266.get_hour() > 12:
                 hour = esp8266.get_hour() - 12
             else:
                 hour = esp8266.get_hour()
-            time = "" + str(esp8266.get_hour()) + " / " + str(esp8266.get_minute()) + " / " + str(esp8266.get_second())
-            date = "" + str(esp8266.get_day()) + " / " + str(esp8266.get_month()) + " / " + str(esp8266.get_year())
+            time = "" + str(esp8266.get_hour()) + " / " + ("" + str(esp8266.get_minute())) + " / " + ("" + str(esp8266.get_second()))
+            date = "" + str(esp8266.get_day()) + " / " + ("" + str(esp8266.get_month())) + " / " + ("" + str(esp8266.get_year()))
         else:
             esp8266.update_internet_time()
 basic.forever(on_forever3)

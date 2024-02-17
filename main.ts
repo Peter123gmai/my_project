@@ -1,13 +1,8 @@
-/**
- * #define BLYNK_TEMPLATE_ID "TMPL6mDQdY-HU"
- * 
- * #define BLYNK_TEMPLATE_NAME "Quickstart Template"
- * 
- * #define BLYNK_AUTH_TOKEN "xSgmbQg-83OPJxGfZk6upXthH15t0-9t"
- */
-datalogger.onLogFull(function () {
-    datalogger.deleteLog(datalogger.DeleteType.Full)
-})
+// #define BLYNK_TEMPLATE_ID "TMPL6mDQdY-HU"
+// 
+// #define BLYNK_TEMPLATE_NAME "Quickstart Template"
+// 
+// #define BLYNK_AUTH_TOKEN "xSgmbQg-83OPJxGfZk6upXthH15t0-9t"
 function Wifi () {
     esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BaudRate115200)
     if (esp8266.isESP8266Initialized()) {
@@ -34,7 +29,6 @@ function Wifi () {
                 basic.showIcon(IconNames.No)
                 basic.clearScreen()
             }
-            datalogger.log(datalogger.createCV("Error wifi", 2))
             control.reset()
         }
     } else {
@@ -57,9 +51,27 @@ function Wifi () {
             basic.showIcon(IconNames.No)
             basic.clearScreen()
         }
-        datalogger.log(datalogger.createCV("Error wifi1", 2))
         control.reset()
     }
+}
+function Starting_up () {
+    NFC.NFC_setSerial(SerialPin.P2, SerialPin.P8)
+    OLED12864_I2C.init(60)
+    list2 = [1, 1]
+    keypad.setKeyPad4(
+    DigitalPin.P9,
+    DigitalPin.P10,
+    DigitalPin.P11,
+    DigitalPin.P12,
+    DigitalPin.P13,
+    DigitalPin.P14,
+    DigitalPin.P15,
+    DigitalPin.P16
+    )
+    music.play(music.createSoundExpression(WaveShape.Sine, 1, 5000, 0, 255, 1000, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
+    basic.pause(500)
+    music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
+    Wifi()
 }
 function Startup () {
     basic.showLeds(`
@@ -145,6 +157,7 @@ function Sensor_DHT22 () {
             1
             )
         }
+        OLED12864_I2C.clear()
         Startup()
     } else if (!(dht11_dht22.sensorrResponding()) || !(dht11_dht22.readDataSuccessful())) {
         OLED12864_I2C.clear()
@@ -172,7 +185,6 @@ function Sensor_DHT22 () {
             basic.showIcon(IconNames.No)
             basic.clearScreen()
         }
-        datalogger.log(datalogger.createCV("Error sensor", 1))
         control.reset()
     }
 }
@@ -180,23 +192,8 @@ let date = ""
 let time = ""
 let hour = 0
 let minute_text = ""
-NFC.NFC_setSerial(SerialPin.P15, SerialPin.P16)
-OLED12864_I2C.init(60)
-let list2 = [1, 1]
-keypad.setKeyPad4(
-DigitalPin.P9,
-DigitalPin.P10,
-DigitalPin.P11,
-DigitalPin.P12,
-DigitalPin.P13,
-DigitalPin.P14,
-DigitalPin.P15,
-DigitalPin.P16
-)
-music.play(music.createSoundExpression(WaveShape.Sine, 1, 5000, 0, 255, 1000, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
-basic.pause(500)
-music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
-Wifi()
+let list2: number[] = []
+Starting_up()
 basic.forever(function () {
     if (NFC.detectedRFIDcard()) {
         OLED12864_I2C.showString(
@@ -220,9 +217,10 @@ basic.forever(function () {
         1
         )
         if (keypad.getKeyString() == "A312465BDC") {
-            pins.servoWritePin(AnalogPin.P14, 140)
+            pins.servoWritePin(AnalogPin.P5, 140)
+            OLED12864_I2C.clear()
         } else {
-            pins.servoWritePin(AnalogPin.P14, 90)
+            pins.servoWritePin(AnalogPin.P5, 90)
         }
     }
 })
@@ -247,7 +245,7 @@ basic.forever(function () {
         esp8266.updateInternetTime()
         if (esp8266.isInternetTimeUpdated()) {
             if ((0 as any) < (10 as any)) {
-                minute_text = "0" + esp8266.getMinute()
+                minute_text = "0" + ("" + esp8266.getMinute())
             } else {
                 minute_text = convertToText(esp8266.getMinute())
             }
@@ -256,8 +254,8 @@ basic.forever(function () {
             } else {
                 hour = esp8266.getHour()
             }
-            time = "" + esp8266.getHour() + " / " + esp8266.getMinute() + " / " + esp8266.getSecond()
-            date = "" + esp8266.getDay() + " / " + esp8266.getMonth() + " / " + esp8266.getYear()
+            time = "" + esp8266.getHour() + " / " + ("" + esp8266.getMinute()) + " / " + ("" + esp8266.getSecond())
+            date = "" + esp8266.getDay() + " / " + ("" + esp8266.getMonth()) + " / " + ("" + esp8266.getYear())
         } else {
             esp8266.updateInternetTime()
         }

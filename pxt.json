@@ -8,7 +8,6 @@
         "microphone": "*",
         "pxt-DHT11_DHT22": "github:alankrantas/pxt-dht11_dht22#v0.0.3",
         "pxt-esp8266": "github:cytrontechnologies/pxt-esp8266#v2.0.1",
-        "datalogger": "*",
         "OLED12864_I2C": "github:makecode-extensions/oled12864_i2c#v1.5.0",
         "NFC": "github:dochoistem/pxt-NFC#ae4d6dba0bb60f70623b152bff874d1c575ef1e4"
     },
