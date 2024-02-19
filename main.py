@@ -1,5 +1,12 @@
 def Starting_up():
     global list2
+    bluetooth.start_accelerometer_service()
+    bluetooth.start_button_service()
+    bluetooth.start_io_pin_service()
+    bluetooth.start_led_service()
+    bluetooth.start_temperature_service()
+    bluetooth.start_magnetometer_service()
+    bluetooth.start_uart_service()
     NFC.NFC_setSerial(SerialPin.P2, SerialPin.P8)
     OLED12864_I2C.init(60)
     list2 = [1, 1]
@@ -230,7 +237,6 @@ hour = 0
 minute_text = ""
 list2: List[number] = []
 pins.analog_write_pin(AnalogPin.P6, 0)
-bluetooth.start_uart_service()
 Starting_up()
 
 def on_forever():
