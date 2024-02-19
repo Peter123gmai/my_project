@@ -201,7 +201,7 @@ def Sensor_DHT22():
 def my_function():
     if NFC.get_uid() == "2991AAA3":
         pins.analog_write_pin(AnalogPin.P6, 511)
-        basic.pause(2000)
+        basic.pause(1500)
         pins.analog_write_pin(AnalogPin.P6, 0)
     elif NFC.get_uid() == "5547562A":
         bluetooth.uart_write_string("Gate opened")

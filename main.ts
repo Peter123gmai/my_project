@@ -259,7 +259,7 @@ function Sensor_DHT22 () {
 NFC.nfcEvent(function () {
     if (NFC.getUID() == "2991AAA3") {
         pins.analogWritePin(AnalogPin.P6, 511)
-        basic.pause(2000)
+        basic.pause(1500)
         pins.analogWritePin(AnalogPin.P6, 0)
     } else if (NFC.getUID() == "5547562A") {
         bluetooth.uartWriteString("Gate opened")
