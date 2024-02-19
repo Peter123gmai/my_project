@@ -1,4 +1,11 @@
 function Starting_up () {
+    bluetooth.startAccelerometerService()
+    bluetooth.startButtonService()
+    bluetooth.startIOPinService()
+    bluetooth.startLEDService()
+    bluetooth.startTemperatureService()
+    bluetooth.startMagnetometerService()
+    bluetooth.startUartService()
     NFC.NFC_setSerial(SerialPin.P2, SerialPin.P8)
     OLED12864_I2C.init(60)
     list2 = [1, 1]
@@ -310,7 +317,6 @@ let hour = 0
 let minute_text = ""
 let list2: number[] = []
 pins.analogWritePin(AnalogPin.P6, 0)
-bluetooth.startUartService()
 Starting_up()
 basic.forever(function () {
     temperature_show()
