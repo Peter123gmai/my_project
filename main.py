@@ -113,6 +113,14 @@ def Wifi():
             basic.show_icon(IconNames.NO)
             basic.clear_screen()
         control.reset()
+def sensor_door():
+    global user_leaved
+    if pins.digital_read_pin(DigitalPin.P4) == 1 and user_leaved:
+        music.ring_tone(988)
+        esp8266.send_telegram_message("", "", "emergency warning !!! Stranger detected")
+        user_leaved = False
+    else:
+        music.stop_all_sounds()
 def Startup():
     basic.show_leds("""
         # . # . #
@@ -236,11 +244,14 @@ time = ""
 hour = 0
 minute_text = ""
 list2: List[number] = []
+user_leaved = False
 pins.analog_write_pin(AnalogPin.P6, 0)
+user_leaved = False
 Starting_up()
 
 def on_forever():
     temperature_show()
     send_info_from_sensor()
     read_time_set()
+    sensor_door()
 basic.forever(on_forever)

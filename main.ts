@@ -32,7 +32,7 @@ function Starting_up () {
     OLED12864_I2C.showString(
     0,
     0,
-    "Device serial number: " + ("" + control.deviceSerialNumber()),
+    "Device serial number: " + control.deviceSerialNumber(),
     1
     )
 }
@@ -41,7 +41,7 @@ function read_time_set () {
         esp8266.updateInternetTime()
         if (esp8266.isInternetTimeUpdated()) {
             if ((0 as any) < (10 as any)) {
-                minute_text = "0" + ("" + esp8266.getMinute())
+                minute_text = "0" + esp8266.getMinute()
             } else {
                 minute_text = convertToText(esp8266.getMinute())
             }
@@ -50,8 +50,8 @@ function read_time_set () {
             } else {
                 hour = esp8266.getHour()
             }
-            time = "" + esp8266.getHour() + " / " + ("" + esp8266.getMinute()) + " / " + ("" + esp8266.getSecond())
-            date = "" + esp8266.getDay() + " / " + ("" + esp8266.getMonth()) + " / " + ("" + esp8266.getYear())
+            time = "" + esp8266.getHour() + " / " + esp8266.getMinute() + " / " + esp8266.getSecond()
+            date = "" + esp8266.getDay() + " / " + esp8266.getMonth() + " / " + esp8266.getYear()
         } else {
             esp8266.updateInternetTime()
         }
@@ -111,6 +111,15 @@ function Wifi () {
             basic.clearScreen()
         }
         control.reset()
+    }
+}
+function sensor_door () {
+    if (pins.digitalReadPin(DigitalPin.P4) == 1 && user_leaved) {
+        music.ringTone(988)
+        esp8266.sendTelegramMessage("", "", "emergency warning !!! Stranger detected")
+        user_leaved = false
+    } else {
+        music.stopAllSounds()
     }
 }
 function Startup () {
@@ -316,10 +325,13 @@ let time = ""
 let hour = 0
 let minute_text = ""
 let list2: number[] = []
+let user_leaved = false
 pins.analogWritePin(AnalogPin.P6, 0)
+user_leaved = false
 Starting_up()
 basic.forever(function () {
     temperature_show()
     send_info_from_sensor()
     read_time_set()
+    sensor_door()
 })
