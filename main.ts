@@ -117,6 +117,7 @@ function sensor_door () {
     if (pins.digitalReadPin(DigitalPin.P4) == 1 && user_leaved) {
         music.ringTone(988)
         esp8266.sendTelegramMessage("", "", "emergency warning !!! Stranger detected")
+        basic.pause(2000)
         user_leaved = false
     } else {
         music.stopAllSounds()
@@ -273,6 +274,9 @@ function Sensor_DHT22 () {
     }
 }
 NFC.nfcEvent(function () {
+    // có hai module thẻ RFID ở hai vị trí bao gồm: 
+    // 1. Cổng, lối vào đầu tiên
+    // 2.Cửa chính, sẽ bao gồm mật khẩu và thẻ RFID để mở khóa
     if (NFC.getUID() == "2991AAA3") {
         pins.analogWritePin(AnalogPin.P6, 511)
         basic.pause(1500)

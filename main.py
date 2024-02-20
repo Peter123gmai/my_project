@@ -118,6 +118,7 @@ def sensor_door():
     if pins.digital_read_pin(DigitalPin.P4) == 1 and user_leaved:
         music.ring_tone(988)
         esp8266.send_telegram_message("", "", "emergency warning !!! Stranger detected")
+        basic.pause(2000)
         user_leaved = False
     else:
         music.stop_all_sounds()
@@ -214,6 +215,9 @@ def Sensor_DHT22():
         control.reset()
 
 def my_function():
+    # có hai module thẻ RFID ở hai vị trí bao gồm: 
+    # 1. Cổng, lối vào đầu tiên
+    # 2.Cửa chính, sẽ bao gồm mật khẩu và thẻ RFID để mở khóa
     if NFC.get_uid() == "2991AAA3":
         pins.analog_write_pin(AnalogPin.P6, 511)
         basic.pause(1500)
