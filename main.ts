@@ -36,20 +36,11 @@ function Starting_up () {
     1
     )
 }
+// get time for NTP server
 function read_time_set () {
     if (esp8266.isWifiConnected() && esp8266.isESP8266Initialized()) {
         esp8266.updateInternetTime()
         if (esp8266.isInternetTimeUpdated()) {
-            if ((0 as any) < (10 as any)) {
-                minute_text = "0" + esp8266.getMinute()
-            } else {
-                minute_text = convertToText(esp8266.getMinute())
-            }
-            if (esp8266.getHour() > 12) {
-                hour = esp8266.getHour() - 12
-            } else {
-                hour = esp8266.getHour()
-            }
             time = "" + esp8266.getHour() + " / " + esp8266.getMinute() + " / " + esp8266.getSecond()
             date = "" + esp8266.getDay() + " / " + esp8266.getMonth() + " / " + esp8266.getYear()
         } else {
@@ -114,11 +105,11 @@ function Wifi () {
     }
 }
 function sensor_door () {
-    if (pins.digitalReadPin(DigitalPin.P4) == 1 && user_leaved) {
+    if (pins.digitalReadPin(DigitalPin.P4) == 1 && door_status) {
         music.ringTone(988)
         esp8266.sendTelegramMessage("", "", "emergency warning !!! Stranger detected")
         basic.pause(2000)
-        user_leaved = false
+        door_status = false
     } else {
         music.stopAllSounds()
     }
@@ -282,7 +273,6 @@ NFC.nfcEvent(function () {
         basic.pause(1500)
         pins.analogWritePin(AnalogPin.P6, 0)
     } else if (NFC.getUID() == "5547562A") {
-        bluetooth.uartWriteString("Gate opened")
         OLED12864_I2C.showString(
         0,
         0,
@@ -293,7 +283,7 @@ NFC.nfcEvent(function () {
         OLED12864_I2C.showString(
         0,
         0,
-        "Next, Type your password",
+        "Next you need to enter the password you set to enter the house",
         1
         )
         OLED12864_I2C.clear()
@@ -313,7 +303,6 @@ NFC.nfcEvent(function () {
             1
             )
             if (keypad.getKeyString() == "#") {
-                bluetooth.uartWriteString("Gate closed")
                 pins.servoWritePin(AnalogPin.P5, 90)
                 OLED12864_I2C.clear()
             } else {
@@ -326,12 +315,10 @@ NFC.nfcEvent(function () {
 })
 let date = ""
 let time = ""
-let hour = 0
-let minute_text = ""
 let list2: number[] = []
-let user_leaved = false
+let door_status = false
 pins.analogWritePin(AnalogPin.P6, 0)
-user_leaved = false
+door_status = false
 Starting_up()
 basic.forever(function () {
     temperature_show()

@@ -43,19 +43,12 @@ def Starting_up():
         0,
         "Device serial number: " + str(control.device_serial_number()),
         1)
+# get time for NTP server
 def read_time_set():
-    global minute_text, hour, time, date
+    global time, date
     if esp8266.is_wifi_connected() and esp8266.is_esp8266_initialized():
         esp8266.update_internet_time()
         if esp8266.is_internet_time_updated():
-            if (0) < (10):
-                minute_text = "0" + str(esp8266.get_minute())
-            else:
-                minute_text = convert_to_text(esp8266.get_minute())
-            if esp8266.get_hour() > 12:
-                hour = esp8266.get_hour() - 12
-            else:
-                hour = esp8266.get_hour()
             time = "" + str(esp8266.get_hour()) + " / " + str(esp8266.get_minute()) + " / " + str(esp8266.get_second())
             date = "" + str(esp8266.get_day()) + " / " + str(esp8266.get_month()) + " / " + str(esp8266.get_year())
         else:
@@ -114,12 +107,12 @@ def Wifi():
             basic.clear_screen()
         control.reset()
 def sensor_door():
-    global user_leaved
-    if pins.digital_read_pin(DigitalPin.P4) == 1 and user_leaved:
+    global door_status
+    if pins.digital_read_pin(DigitalPin.P4) == 1 and door_status:
         music.ring_tone(988)
         esp8266.send_telegram_message("", "", "emergency warning !!! Stranger detected")
         basic.pause(2000)
-        user_leaved = False
+        door_status = False
     else:
         music.stop_all_sounds()
 def Startup():
@@ -223,7 +216,6 @@ def my_function():
         basic.pause(1500)
         pins.analog_write_pin(AnalogPin.P6, 0)
     elif NFC.get_uid() == "5547562A":
-        bluetooth.uart_write_string("Gate opened")
         OLED12864_I2C.show_string(0, 0, "RFID card is detected!", 1)
         OLED12864_I2C.clear()
         OLED12864_I2C.show_string(0, 0, "Next, Type your password", 1)
@@ -234,7 +226,6 @@ def my_function():
             OLED12864_I2C.clear()
             OLED12864_I2C.show_string(0, 0, "Type # to close", 1)
             if keypad.get_key_string() == "#":
-                bluetooth.uart_write_string("Gate closed")
                 pins.servo_write_pin(AnalogPin.P5, 90)
                 OLED12864_I2C.clear()
             else:
@@ -245,12 +236,10 @@ NFC.nfc_event(my_function)
 
 date = ""
 time = ""
-hour = 0
-minute_text = ""
 list2: List[number] = []
-user_leaved = False
+door_status = False
 pins.analog_write_pin(AnalogPin.P6, 0)
-user_leaved = False
+door_status = False
 Starting_up()
 
 def on_forever():
