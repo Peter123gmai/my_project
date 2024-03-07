@@ -1,5 +1,5 @@
 {
-    "name": "smart home #2",
+    "name": "smart home",
     "version": "1.0.0",
     "description": "",
     "dependencies": {
@@ -33,5 +33,16 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "blocksprj",
+    "yotta": {
+        "config": {
+            "microbit-dal": {
+                "bluetooth": {
+                    "open": 1,
+                    "whitelist": 0,
+                    "security_level": null
+                }
+            }
+        }
+    }
 }

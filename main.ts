@@ -1,48 +1,9 @@
-function Starting_up () {
-    bluetooth.startAccelerometerService()
-    bluetooth.startButtonService()
-    bluetooth.startIOPinService()
-    bluetooth.startLEDService()
-    bluetooth.startTemperatureService()
-    bluetooth.startMagnetometerService()
-    bluetooth.startUartService()
-    NFC.NFC_setSerial(SerialPin.P2, SerialPin.P8)
-    OLED12864_I2C.init(60)
-    list2 = [1, 1]
-    keypad.setKeyPad4(
-    DigitalPin.P9,
-    DigitalPin.P10,
-    DigitalPin.P11,
-    DigitalPin.P12,
-    DigitalPin.P13,
-    DigitalPin.P14,
-    DigitalPin.P15,
-    DigitalPin.P16
-    )
-    music.play(music.createSoundExpression(WaveShape.Sine, 1, 5000, 0, 255, 1000, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
-    basic.pause(500)
-    music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
-    Wifi()
-    OLED12864_I2C.showString(
-    0,
-    0,
-    "Smarthome Iot version 5.8.4",
-    1
-    )
-    OLED12864_I2C.showString(
-    0,
-    0,
-    "Device serial number: " + control.deviceSerialNumber(),
-    1
-    )
-}
 // get time for NTP server
 function read_time_set () {
     if (esp8266.isWifiConnected() && esp8266.isESP8266Initialized()) {
         esp8266.updateInternetTime()
         if (esp8266.isInternetTimeUpdated()) {
-            time = "" + esp8266.getHour() + " / " + esp8266.getMinute() + " / " + esp8266.getSecond()
-            date = "" + esp8266.getDay() + " / " + esp8266.getMonth() + " / " + esp8266.getYear()
+            Time_and_date = ["" + esp8266.getHour() + " / " + esp8266.getMinute(), "" + esp8266.getDay() + " / " + esp8266.getMonth()]
         } else {
             esp8266.updateInternetTime()
         }
@@ -51,11 +12,17 @@ function read_time_set () {
 bluetooth.onBluetoothConnected(function () {
     basic.showIcon(IconNames.Yes)
     basic.clearScreen()
+    connection = true
+    while (connection) {
+        data = bluetooth.uartReadUntil(serial.delimiters(Delimiters.Hash))
+        living_room_code()
+        kitchen_code()
+    }
 })
 function Wifi () {
     esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BaudRate115200)
     if (esp8266.isESP8266Initialized()) {
-        esp8266.connectWiFi("HOAN VAN", "winthovanhoan")
+        esp8266.connectWiFi(ssid, password)
         if (esp8266.isWifiConnected()) {
             Sensor_DHT22()
         } else {
@@ -68,7 +35,7 @@ function Wifi () {
             )
             OLED12864_I2C.clear()
             basic.pause(2000)
-            esp8266.connectWiFi("HOAN VAN", "winthovanhoan")
+            esp8266.connectWiFi(ssid, password)
             basic.pause(500)
             esp8266.sendTelegramMessage("", "", "Cannot connect to router. Please check and reboot sysstem")
             if (esp8266.isTelegramMessageSent()) {
@@ -91,7 +58,7 @@ function Wifi () {
         OLED12864_I2C.clear()
         basic.pause(2000)
         esp8266.init(SerialPin.P0, SerialPin.P1, BaudRate.BaudRate115200)
-        esp8266.connectWiFi("HOAN VAN", "Winthovanhoan")
+        esp8266.connectWiFi(ssid, password)
         basic.pause(500)
         esp8266.sendTelegramMessage("", "", "ESP8266 is not found. Please check and reboot sysstem")
         if (esp8266.isTelegramMessageSent()) {
@@ -102,6 +69,13 @@ function Wifi () {
             basic.clearScreen()
         }
         control.reset()
+    }
+}
+function kitchen_code () {
+    if (true) {
+    	
+    } else if (data == "") {
+    	
     }
 }
 function sensor_door () {
@@ -160,6 +134,35 @@ function Startup () {
     basic.clearScreen()
     music.play(music.stringPlayable("C E G B C5 A F D ", 325), music.PlaybackMode.UntilDone)
     music.stopAllSounds()
+}
+function living_room_code () {
+    if (data == "air_conditioner_turned_on") {
+        status1[0] = true
+    } else if (data == "air_conditioner_turned_off") {
+        status1[0] = false
+    } else if (data == "living_room_light _turned_on") {
+        status1[1] = true
+    } else if (data == "living_room_light _turned_off") {
+        status1[1] = false
+    } else if (data == "TV_turned _on") {
+        status1[2] = true
+    } else if (data == "TV_turned _off") {
+        status1[2] = false
+    } else if (data == "movie_mode_enabled") {
+        status1[0] = true
+        status1[1] = false
+        status1[2] = true
+        status1[3] = false
+    } else if (data == "movie_mode_disabled") {
+        status1[0] = false
+        status1[1] = true
+        status1[2] = false
+        status1[3] = true
+    } else if (data == "window_blinds_open") {
+        status1[3] = true
+    } else if (data == "window_blinds_close") {
+        status1[3] = false
+    }
 }
 function temperature_show () {
     if (dht11_dht22.readDataSuccessful() && dht11_dht22.sensorrResponding()) {
@@ -293,7 +296,7 @@ NFC.nfcEvent(function () {
         keypad.getKeyString(),
         1
         )
-        if (keypad.getKeyString() == "A312465BDC") {
+        if (keypad.getKeyString() == password_door) {
             pins.servoWritePin(AnalogPin.P5, 140)
             OLED12864_I2C.clear()
             OLED12864_I2C.showString(
@@ -313,16 +316,87 @@ NFC.nfcEvent(function () {
         }
     }
 })
-let date = ""
-let time = ""
-let list2: number[] = []
+let temp_air = 0
+let data = ""
+let Time_and_date: string[] = []
+let ssid = ""
+let password = ""
 let door_status = false
+let connection = false
+let status1: boolean[] = []
+let list2: number[] = []
+let password_door = ""
+bluetooth.startAccelerometerService()
+bluetooth.startButtonService()
+bluetooth.startIOPinService()
+bluetooth.startLEDService()
+bluetooth.startTemperatureService()
+bluetooth.startMagnetometerService()
+bluetooth.startUartService()
+NFC.NFC_setSerial(SerialPin.P2, SerialPin.P8)
+OLED12864_I2C.init(60)
+password_door = "A312465BDC"
+list2 = [1, 1]
+// tạo 1 mảng chứa trạng thái các đồ điện tử lần lượt từ trên xuống dưới là:
+// -điều hòa
+// -đèn phòng khách
+// -TV
+// -Rèm cửa
+status1 = [
+false,
+false,
+false,
+false
+]
+// tạo 1 mảng chứa trạng thái các đồ điện tử lần lượt từ trên xuống dưới là:
+// -điều hòa
+// -đèn phòng khách
+// -TV
+// -Rèm cửa
+let status_kitchen = [false, false]
+connection = false
 pins.analogWritePin(AnalogPin.P6, 0)
 door_status = false
-Starting_up()
+password = "Winthovanhoan"
+ssid = "HOAN VAN"
+keypad.setKeyPad4(
+DigitalPin.P9,
+DigitalPin.P10,
+DigitalPin.P11,
+DigitalPin.P12,
+DigitalPin.P13,
+DigitalPin.P14,
+DigitalPin.P15,
+DigitalPin.P16
+)
+music.play(music.createSoundExpression(WaveShape.Sine, 1, 5000, 0, 255, 1000, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
+basic.pause(500)
+music.play(music.createSoundExpression(WaveShape.Sine, 5000, 5000, 255, 255, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
+Wifi()
+OLED12864_I2C.showString(
+0,
+0,
+"6.1.5",
+1
+)
+OLED12864_I2C.showString(
+0,
+0,
+"Device serial number: " + control.deviceSerialNumber(),
+1
+)
 basic.forever(function () {
     temperature_show()
     send_info_from_sensor()
     read_time_set()
     sensor_door()
+    if (data.includes("#331")) {
+        temp_air = parseFloat("" + data.charAt(0) + data.charAt(1))
+    } else if (data.includes("#415")) {
+        ssid = ssid
+    } else if (data.includes("#416")) {
+    	
+    } else if (data.includes("#417")) {
+        ssid = ssid
+    }
 })
